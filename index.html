@@ -3,130 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitLab Merge Requests</title>
+    <title>MR Data Viewer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
         }
-        .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
-        }
-        header {
-            background: #333;
-            color: #fff;
-            padding-top: 30px;
-            min-height: 70px;
-            border-bottom: #77aaff 3px solid;
-        }
-        header a {
-            color: #fff;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 16px;
-        }
-        header ul {
-            padding: 0;
-            list-style: none;
-        }
-        header li {
-            display: inline;
-            padding: 0 20px 0 20px;
-        }
-        .search-bar {
-            margin: 20px 0;
-        }
-        .search-bar input {
-            width: 100%;
+        .mr {
+            border: 1px solid #ccc;
             padding: 10px;
-            font-size: 16px;
-        }
-        .mr-list {
-            margin: 20px 0;
-        }
-        .mr-item {
-            background: #fff;
-            margin-bottom: 10px;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .mr-item h3 {
-            margin: 0;
-            padding: 0;
-        }
-        .mr-item p {
             margin: 10px 0;
+        }
+        .mr h2 {
+            margin: 0;
+        }
+        .mr p {
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>GitLab Merge Requests</h1>
-        </div>
-    </header>
-    <div class="container">
-        <div class="search-bar">
-            <input type="text" id="search" placeholder="Search merge requests...">
-        </div>
-        <div class="mr-list" id="mr-list">
-            <!-- Merge requests will be displayed here -->
-        </div>
-    </div>
+    <h1>Merge Request Data Viewer</h1>
+    <div id="mr-container"></div>
+
     <script>
-        const indexUrl = 'https://my-mr-data-test-bucket.s3.us-east-1.amazonaws.com/mr-data/index.json'; // Replace with your S3 bucket URL
+        const s3BucketUrl = 'https://my-mr-data-test-bucket.s3.us-east-1.amazonaws.com';
+        const indexUrl = `${s3BucketUrl}/mr-data/index.json`;
 
-        async function fetchData() {
-            const response = await fetch(indexUrl);
-            const indexData = await response.json();
-            const mrList = document.getElementById('mr-list');
+        async function fetchIndexData() {
+            try {
+                const response = await fetch(indexUrl);
+                const indexData = await response.json();
+                return indexData;
+            } catch (error) {
+                console.error('Error fetching index data:', error);
+                return null;
+            }
+        }
 
+        async function fetchMRData(dataPath) {
+            try {
+                const response = await fetch(`${s3BucketUrl}/${dataPath}`);
+                const mrData = await response.json();
+                return mrData;
+            } catch (error) {
+                console.error('Error fetching MR data:', error);
+                return [];
+            }
+        }
+
+        async function displayAllMRData() {
+            const indexData = await fetchIndexData();
+            if (!indexData) return;
+
+            const container = document.getElementById('mr-container');
             for (const projectId in indexData) {
                 for (const entry of indexData[projectId]) {
-                    const dataResponse = await fetch(`https://my-mr-data-test-bucket.s3.us-east-1.amazonaws.com/${entry.data_path}`);
-                    const mrData = await dataResponse.json();
-
+                    const mrData = await fetchMRData(entry.data_path);
                     mrData.forEach(mr => {
-                        const mrItem = document.createElement('div');
-                        mrItem.className = 'mr-item';
-                        mrItem.innerHTML = `
-                            <h3>${mr.title}</h3>
-                            <p><strong>Author:</strong> ${mr.author}</p>
+                        const mrElement = document.createElement('div');
+                        mrElement.className = 'mr';
+                        mrElement.innerHTML = `
+                            <h2>${mr.title}</h2>
+                            <p><strong>ID:</strong> ${mr.id}</p>
+                            <p><strong>Description:</strong> ${mr.description}</p>
                             <p><strong>State:</strong> ${mr.state}</p>
+                            <p><strong>Author:</strong> ${mr.author}</p>
+                            <p><strong>Reviewers:</strong> ${mr.reviewers.join(', ')}</p>
                             <p><strong>Created At:</strong> ${mr.created_at}</p>
                             <p><strong>Updated At:</strong> ${mr.updated_at}</p>
-                            <p><strong>Reviewers:</strong> ${mr.reviewers.join(', ')}</p>
                             <p><strong>Comments:</strong> ${mr.comments.join('<br>')}</p>
                             <p><a href="${mr.web_url}" target="_blank">View on GitLab</a></p>
                         `;
-                        mrList.appendChild(mrItem);
+                        container.appendChild(mrElement);
                     });
                 }
             }
         }
 
-        function searchMRs() {
-            const searchInput = document.getElementById('search').value.toLowerCase();
-            const mrItems = document.querySelectorAll('.mr-item');
-
-            mrItems.forEach(item => {
-                const title = item.querySelector('h3').innerText.toLowerCase();
-                if (title.includes(searchInput)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-
-        document.getElementById('search').addEventListener('input', searchMRs);
-
-        fetchData();
+        displayAllMRData();
     </script>
 </body>
 </html>
