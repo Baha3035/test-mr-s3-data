@@ -73,20 +73,20 @@
                                 <p><strong>Description:</strong> ${mr.description}</p>
                                 <p><strong>State:</strong> ${mr.state}</p>
                                 <p><strong>Author:</strong> ${mr.author}</p>
-                                <p><strong>Reviewers:</strong> ${mr.reviewers.join(', ')}</p>
-                                <p><strong>Assignees:</strong> ${mr.assignees.join(', ')}</p>
-                                <p><strong>Labels:</strong> ${mr.labels.join(', ')}</p>
-                                <p><strong>Milestone:</strong> ${mr.milestone}</p>
+                                <p><strong>Reviewers:</strong> ${mr.reviewers ? mr.reviewers.join(', ') : 'N/A'}</p>
+                                <p><strong>Assignees:</strong> ${mr.assignees ? mr.assignees.join(', ') : 'N/A'}</p>
+                                <p><strong>Labels:</strong> ${mr.labels ? mr.labels.join(', ') : 'N/A'}</p>
+                                <p><strong>Milestone:</strong> ${mr.milestone || 'N/A'}</p>
                                 <p><strong>Merge Status:</strong> ${mr.merge_status}</p>
-                                <p><strong>Merged By:</strong> ${mr.merged_by}</p>
-                                <p><strong>Merged At:</strong> ${mr.merged_at}</p>
-                                <p><strong>Closed By:</strong> ${mr.closed_by}</p>
-                                <p><strong>Closed At:</strong> ${mr.closed_at}</p>
+                                <p><strong>Merged By:</strong> ${mr.merged_by || 'N/A'}</p>
+                                <p><strong>Merged At:</strong> ${mr.merged_at || 'N/A'}</p>
+                                <p><strong>Closed By:</strong> ${mr.closed_by || 'N/A'}</p>
+                                <p><strong>Closed At:</strong> ${mr.closed_at || 'N/A'}</p>
                                 <p><strong>Source Branch:</strong> ${mr.source_branch}</p>
                                 <p><strong>Target Branch:</strong> ${mr.target_branch}</p>
                                 <p><strong>Created At:</strong> ${mr.created_at}</p>
                                 <p><strong>Updated At:</strong> ${mr.updated_at}</p>
-                                <p><strong>Comments:</strong> ${mr.comments.join('<br>')}</p>
+                                <p><strong>Comments:</strong> ${mr.comments ? mr.comments.join('<br>') : 'N/A'}</p>
                                 <p><a href="${mr.web_url}" target="_blank">View on GitLab</a></p>
                             `;
                             container.appendChild(mrElement);
