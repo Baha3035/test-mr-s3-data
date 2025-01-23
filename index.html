@@ -56,25 +56,41 @@
             if (!indexData) return;
 
             const container = document.getElementById('mr-container');
+            const displayedMRs = new Set(); // To track displayed MRs and avoid duplication
+
             for (const projectId in indexData) {
                 for (const entry of indexData[projectId]) {
                     const mrData = await fetchMRData(entry.data_path);
                     mrData.forEach(mr => {
-                        const mrElement = document.createElement('div');
-                        mrElement.className = 'mr';
-                        mrElement.innerHTML = `
-                            <h2>${mr.title}</h2>
-                            <p><strong>ID:</strong> ${mr.id}</p>
-                            <p><strong>Description:</strong> ${mr.description}</p>
-                            <p><strong>State:</strong> ${mr.state}</p>
-                            <p><strong>Author:</strong> ${mr.author}</p>
-                            <p><strong>Reviewers:</strong> ${mr.reviewers.join(', ')}</p>
-                            <p><strong>Created At:</strong> ${mr.created_at}</p>
-                            <p><strong>Updated At:</strong> ${mr.updated_at}</p>
-                            <p><strong>Comments:</strong> ${mr.comments.join('<br>')}</p>
-                            <p><a href="${mr.web_url}" target="_blank">View on GitLab</a></p>
-                        `;
-                        container.appendChild(mrElement);
+                        if (!displayedMRs.has(mr.id)) {
+                            displayedMRs.add(mr.id); // Mark MR as displayed
+
+                            const mrElement = document.createElement('div');
+                            mrElement.className = 'mr';
+                            mrElement.innerHTML = `
+                                <h2>${mr.title}</h2>
+                                <p><strong>ID:</strong> ${mr.id}</p>
+                                <p><strong>Description:</strong> ${mr.description}</p>
+                                <p><strong>State:</strong> ${mr.state}</p>
+                                <p><strong>Author:</strong> ${mr.author}</p>
+                                <p><strong>Reviewers:</strong> ${mr.reviewers.join(', ')}</p>
+                                <p><strong>Assignees:</strong> ${mr.assignees.join(', ')}</p>
+                                <p><strong>Labels:</strong> ${mr.labels.join(', ')}</p>
+                                <p><strong>Milestone:</strong> ${mr.milestone}</p>
+                                <p><strong>Merge Status:</strong> ${mr.merge_status}</p>
+                                <p><strong>Merged By:</strong> ${mr.merged_by}</p>
+                                <p><strong>Merged At:</strong> ${mr.merged_at}</p>
+                                <p><strong>Closed By:</strong> ${mr.closed_by}</p>
+                                <p><strong>Closed At:</strong> ${mr.closed_at}</p>
+                                <p><strong>Source Branch:</strong> ${mr.source_branch}</p>
+                                <p><strong>Target Branch:</strong> ${mr.target_branch}</p>
+                                <p><strong>Created At:</strong> ${mr.created_at}</p>
+                                <p><strong>Updated At:</strong> ${mr.updated_at}</p>
+                                <p><strong>Comments:</strong> ${mr.comments.join('<br>')}</p>
+                                <p><a href="${mr.web_url}" target="_blank">View on GitLab</a></p>
+                            `;
+                            container.appendChild(mrElement);
+                        }
                     });
                 }
             }
